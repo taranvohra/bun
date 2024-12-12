@@ -76,12 +76,6 @@ test("wat", async () => {
 }, 500); // test must run in <500ms
 ```
 
-In `bun:test`, test timeouts throw an uncatchable exception to force the test to stop running and fail. We also kill any child processes that were spawned in the test to avoid leaving behind zombie processes lurking in the background.
-
-### 🧟 Zombie process killer
-
-When a test times out and processes spawned in the test via `Bun.spawn`, `Bun.spawnSync`, or `node:child_process` are not killed, they will be automatically killed and a message will be logged to the console.
-
 ## `test.skip`
 
 Skip individual tests with `test.skip`. These tests will not be run.
@@ -97,7 +91,7 @@ test.skip("wat", () => {
 
 ## `test.todo`
 
-Mark a test as a todo with `test.todo`. These tests will not be run.
+Mark a test as a todo with `test.todo`. These tests _will_ be run, and the test runner will expect them to fail. If they pass, you will be prompted to mark it as a regular test.
 
 ```ts
 import { expect, test } from "bun:test";
@@ -107,25 +101,15 @@ test.todo("fix this", () => {
 });
 ```
 
-To run todo tests and find any which are passing, use `bun test --todo`.
+To exclusively run tests marked as _todo_, use `bun test --todo`.
 
 ```sh
 $ bun test --todo
-my.test.ts:
-✗ unimplemented feature
-  ^ this test is marked as todo but passes. Remove `.todo` or check that test is correct.
-
- 0 pass
- 1 fail
- 1 expect() calls
 ```
-
-With this flag, failing todo tests will not cause an error, but todo tests which pass will be marked as failing so you can remove the todo mark or
-fix the test.
 
 ## `test.only`
 
-To run a particular test or suite of tests use `test.only()` or `describe.only()`. Once declared, running `bun test --only` will only execute tests/suites that have been marked with `.only()`. Running `bun test` without the `--only` option with `test.only()` declared will result in all tests in the given suite being executed _up to_ the test with `.only()`. `describe.only()` functions the same in both execution scenarios.
+To run a particular test or suite of tests use `test.only()` or `describe.only()`. Once declared, running `bun test --only` will only execute tests/suites that have been marked with `.only()`.
 
 ```ts
 import { test, describe } from "bun:test";
@@ -151,12 +135,6 @@ The following command will only execute tests #2 and #3.
 $ bun test --only
 ```
 
-The following command will only execute tests #1, #2 and #3.
-
-```sh
-$ bun test
-```
-
 ## `test.if`
 
 To run a test conditionally, use `test.if()`. The test will run if the condition is truthy. This is particularly useful for tests that should only run on specific architectures or operating systems.
@@ -172,8 +150,6 @@ test.if(macOS)("runs on macOS", () => {
 });
 ```
 
-## `test.skipIf`
-
 To instead skip a test based on some condition, use `test.skipIf()` or `describe.skipIf()`.
 
 ```ts
@@ -183,85 +159,6 @@ test.skipIf(macOS)("runs on non-macOS", () => {
   // runs if *not* macOS
 });
 ```
-
-## `test.todoIf`
-
-If instead you want to mark the test as TODO, use `test.todoIf()` or `describe.todoIf()`. Carefully choosing `skipIf` or `todoIf` can show a difference between, for example, intent of "invalid for this target" and "planned but not implemented yet."
-
-```ts
-const macOS = process.arch === "darwin";
-
-// TODO: we've only implemented this for Linux so far.
-test.todoIf(macOS)("runs on posix", () => {
-  // runs if *not* macOS
-});
-```
-
-## `test.each`
-
-To return a function for multiple cases in a table of tests, use `test.each`.
-
-```ts
-const cases = [
-  [1, 2, 3],
-  [3, 4, 5],
-];
-
-test.each(cases)("%p + %p should be %p", (a, b, expected) => {
-  // runs once for each test case provided
-});
-```
-
-There are a number of options available for formatting the case label depending on its type.
-
-{% table %}
-
----
-
-- `%p`
-- [`pretty-format`](https://www.npmjs.com/package/pretty-format)
-
----
-
-- `%s`
-- String
-
----
-
-- `%d`
-- Number
-
----
-
-- `%i`
-- Integer
-
----
-
-- `%f`
-- Floating point
-
----
-
-- `%j`
-- JSON
-
----
-
-- `%o`
-- Object
-
----
-
-- `%#`
-- Index of the test case
-
----
-
-- `%%`
-- Single percent sign (`%`)
-
-{% /table %}
 
 ## Matchers
 
@@ -322,31 +219,6 @@ Bun implements the following matchers. Full Jest compatibility is on the roadmap
 ---
 
 - ✅
-- [`.toContainAllKeys()`](https://jest-extended.jestcommunity.dev/docs/matchers/Object#tocontainallkeyskeys)
-
----
-
-- ✅
-- [`.toContainValue()`](https://jest-extended.jestcommunity.dev/docs/matchers/Object#tocontainvaluevalue)
-
----
-
-- ✅
-- [`.toContainValues()`](https://jest-extended.jestcommunity.dev/docs/matchers/Object#tocontainvaluesvalues)
-
----
-
-- ✅
-- [`.toContainAllValues()`](https://jest-extended.jestcommunity.dev/docs/matchers/Object#tocontainallvaluesvalues)
-
----
-
-- ✅
-- [`.toContainAnyValues()`](https://jest-extended.jestcommunity.dev/docs/matchers/Object#tocontainanyvaluesvalues)
-
----
-
-- ✅
 - [`.toStrictEqual()`](https://jestjs.io/docs/expect#tostrictequalvalue)
 
 ---
@@ -366,7 +238,7 @@ Bun implements the following matchers. Full Jest compatibility is on the roadmap
 
 ---
 
-- ✅
+- ❌
 - [`.extend`](https://jestjs.io/docs/expect#expectextendmatchers)
 
 ---
@@ -386,7 +258,7 @@ Bun implements the following matchers. Full Jest compatibility is on the roadmap
 
 ---
 
-- ✅
+- ❌
 - [`.assertions()`](https://jestjs.io/docs/expect#expectassertionsnumber)
 
 ---
@@ -396,7 +268,7 @@ Bun implements the following matchers. Full Jest compatibility is on the roadmap
 
 ---
 
-- ✅
+- ❌
 - [`.hasAssertions()`](https://jestjs.io/docs/expect#expecthasassertions)
 
 ---
@@ -456,12 +328,12 @@ Bun implements the following matchers. Full Jest compatibility is on the roadmap
 
 ---
 
-- ✅
+- ❌
 - [`.toHaveReturned()`](https://jestjs.io/docs/expect#tohavereturned)
 
 ---
 
-- ✅
+- ❌
 - [`.toHaveReturnedTimes()`](https://jestjs.io/docs/expect#tohavereturnedtimesnumber)
 
 ---
@@ -531,17 +403,17 @@ Bun implements the following matchers. Full Jest compatibility is on the roadmap
 
 ---
 
-- ✅
+- ❌
 - [`.toMatchInlineSnapshot()`](https://jestjs.io/docs/expect#tomatchinlinesnapshotpropertymatchers-inlinesnapshot)
 
 ---
 
-- ✅
+- ❌
 - [`.toThrowErrorMatchingSnapshot()`](https://jestjs.io/docs/expect#tothrowerrormatchingsnapshothint)
 
 ---
 
-- ✅
+- ❌
 - [`.toThrowErrorMatchingInlineSnapshot()`](https://jestjs.io/docs/expect#tothrowerrormatchinginlinesnapshotinlinesnapshot)
 
 {% /table %}

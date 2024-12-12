@@ -6,7 +6,7 @@ This page is updated regularly to reflect compatibility status of the latest ver
 
 ### [`node:assert`](https://nodejs.org/api/assert.html)
 
-🟢 Fully implemented.
+🟡 Missing `doesNotMatch`
 
 ### [`node:async_hooks`](https://nodejs.org/api/async_hooks.html)
 
@@ -18,11 +18,11 @@ This page is updated regularly to reflect compatibility status of the latest ver
 
 ### [`node:child_process`](https://nodejs.org/api/child_process.html)
 
-🟡 Missing `proc.gid` `proc.uid`. `Stream` class not exported. IPC cannot send socket handles. Node.js <> Bun IPC can be used with JSON serialization.
+🟡 Missing `Stream` stdio, `proc.gid` `proc.uid`. IPC has partial support and only current only works with other `bun` processes.
 
 ### [`node:cluster`](https://nodejs.org/api/cluster.html)
 
-🟡 Handles and file descriptors cannot be passed between workers, which means load-balancing HTTP requests across processes is only supported on Linux at this time (via `SO_REUSEPORT`). Otherwise, implemented but not battle-tested.
+🔴 Not implemented.
 
 ### [`node:console`](https://nodejs.org/api/console.html)
 
@@ -36,8 +36,7 @@ Some methods are not optimized yet.
 
 ### [`node:dgram`](https://nodejs.org/api/dgram.html)
 
-🟡 Missing `setBroadcast` `setTTL` `setMulticastTTL` `setMulticastLoopback` `setMulticastInterface` `addMembership` `dropMembership`
-`addSourceSpecificMembership` `dropSourceSpecificMembership`
+🔴 Not implemented.
 
 ### [`node:diagnostics_channel`](https://nodejs.org/api/diagnostics_channel.html)
 
@@ -53,23 +52,23 @@ Some methods are not optimized yet.
 
 ### [`node:events`](https://nodejs.org/api/events.html)
 
-🟡 `events.addAbortListener` & `events.getMaxListeners` do not support (web api) `EventTarget`
+🟡 Missing `on` `addAbortListener` `getMaxListeners`
 
 ### [`node:fs`](https://nodejs.org/api/fs.html)
 
-🟡 Missing `statfs` `statfsSync`, `opendirSync`. `Dir` is partially implemented.
+🟡 Missing `Dir` `fdatasync` `fdatasyncSync` `openAsBlob` `opendir` `opendirSync` `statfs` `statfsSync`. `fs.promises.open` incorrectly returns a file descriptor instead of a `FileHandle`.
 
 ### [`node:http`](https://nodejs.org/api/http.html)
 
-🟢 Fully implemented. Outgoing client request body is currently buffered instead of streamed.
+🟢 Fully implemented.
 
 ### [`node:http2`](https://nodejs.org/api/http2.html)
 
-🟡 Client & server are implemented (95.25% of gRPC's test suite passes). Missing `options.allowHTTP1`, `options.enableConnectProtocol`, ALTSVC extension, and `http2stream.pushStream`.
+🟡 Client is supported, but server isn't yet.
 
 ### [`node:https`](https://nodejs.org/api/https.html)
 
-🟢 APIs are implemented, but `Agent` is not always used yet.
+🟢 Fully implemented.
 
 ### [`node:inspector`](https://nodejs.org/api/inspector.html)
 
@@ -77,11 +76,11 @@ Some methods are not optimized yet.
 
 ### [`node:module`](https://nodejs.org/api/module.html)
 
-🟡 Missing `runMain` `syncBuiltinESMExports`, `Module#load()`. Overriding `require.cache` is supported for ESM & CJS modules. `module._extensions`, `module._pathCache`, `module._cache` are no-ops. `module.register` is not implemented and we recommend using a [`Bun.plugin`](https://bun.sh/docs/runtime/plugins) in the meantime.
+🟢 Missing `runMain` `syncBuiltinESMExports`, `Module#load()`. Attempts to override or patch the module cache will fail.
 
 ### [`node:net`](https://nodejs.org/api/net.html)
 
-🟡 `SocketAddress` class not exposed (but implemented). `BlockList` exists but is a no-op.
+🟡 Missing `BlockList` `SocketAddress` `Stream` `getDefaultAutoSelectFamily` `getDefaultAutoSelectFamilyAttemptTimeout` `setDefaultAutoSelectFamily` `setDefaultAutoSelectFamilyAttemptTimeout` `Server#ref()` `Server#unref()` `Socket#ref()` `Socket#unref()`.
 
 ### [`node:os`](https://nodejs.org/api/os.html)
 
@@ -93,7 +92,7 @@ Some methods are not optimized yet.
 
 ### [`node:perf_hooks`](https://nodejs.org/api/perf_hooks.html)
 
-🟡 Missing `createHistogram` `monitorEventLoopDelay`. It's recommended to use `performance` global instead of `perf_hooks.performance`.
+🟡 Only `perf_hooks.performance.now()` and `perf_hooks.performance.timeOrigin` are implemented. Missing `Performance` `PerformanceMark` `PerformanceMeasure` `PerformanceObserverEntryList` `PerformanceResourceTiming` `createHistogram` `monitorEventLoopDelay`. It's recommended to use `performance` global instead of `perf_hooks.performance`.
 
 ### [`node:process`](https://nodejs.org/api/process.html)
 
@@ -117,7 +116,7 @@ Some methods are not optimized yet.
 
 ### [`node:stream`](https://nodejs.org/api/stream.html)
 
-🟡 Missing `getDefaultHighWaterMark` `setDefaultHighWaterMark` `toWeb`
+🟡 Missing `getDefaultHighWaterMark` `setDefaultHighWaterMark`
 
 ### [`node:string_decoder`](https://nodejs.org/api/string_decoder.html)
 
@@ -149,15 +148,15 @@ Some methods are not optimized yet.
 
 ### [`node:url`](https://nodejs.org/api/url.html)
 
-🟢 Fully implemented.
+🟡 Missing `domainToASCII` `domainToUnicode`. It's recommended to use `URL` and `URLSearchParams` globals instead.
 
 ### [`node:util`](https://nodejs.org/api/util.html)
 
-🟡 Missing `MIMEParams` `MIMEType` `debug` `getSystemErrorMap` `transferableAbortController` `transferableAbortSignal` `stripVTControlCharacters`
+🟡 Missing `MIMEParams` `MIMEType` `aborted` `debug` `getSystemErrorMap` `getSystemErrorName` `transferableAbortController` `transferableAbortSignal` `stripVTControlCharacters`
 
 ### [`node:v8`](https://nodejs.org/api/v8.html)
 
-🔴 `serialize` and `deserialize` use JavaScriptCore's wire format instead of V8's. Otherwise, not implemented. For profiling, use [`bun:jsc`](https://bun.sh/docs/project/benchmarking#bunjsc) instead.
+🔴 `serialize` and `deserialize` use JavaScriptCore's wire format instead of V8's. Otherwise, not implemented. For profiling, use [`bun:jsc`](/docs/project/benchmarking#bunjsc) instead.
 
 ### [`node:vm`](https://nodejs.org/api/vm.html)
 
@@ -169,11 +168,11 @@ Some methods are not optimized yet.
 
 ### [`node:worker_threads`](https://nodejs.org/api/worker_threads.html)
 
-🟡 `Worker` doesn't support the following options: `stdin` `stdout` `stderr` `trackedUnmanagedFds` `resourceLimits`. Missing `markAsUntransferable` `moveMessagePortToContext` `getHeapSnapshot`.
+🟡 `Worker` doesn't support the following options: `eval` `argv` `execArgv` `stdin` `stdout` `stderr` `trackedUnmanagedFds` `resourceLimits`. Missing `markAsUntransferable` `moveMessagePortToContext` `getHeapSnapshot`.
 
 ### [`node:zlib`](https://nodejs.org/api/zlib.html)
 
-🟡 Partially optimized, but brotli uses too much memory right now.
+🟡 Missing `BrotliCompress` `BrotliDecompress` `brotliCompressSync` `brotliDecompress` `brotliDecompressSync` `createBrotliCompress` `createBrotliDecompress`. Unoptimized.
 
 ## Globals
 
@@ -193,7 +192,7 @@ The table below lists all globals implemented by Node.js and Bun's current compa
 
 ### [`Buffer`](https://nodejs.org/api/buffer.html#class-buffer)
 
-🟢 Fully implemented.
+🟡 Incomplete implementation of `base64` and `base64url` encodings.
 
 ### [`ByteLengthQueuingStrategy`](https://developer.mozilla.org/en-US/docs/Web/API/ByteLengthQueuingStrategy)
 
@@ -313,23 +312,23 @@ The table below lists all globals implemented by Node.js and Bun's current compa
 
 ### [`PerformanceEntry`](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceEntry)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`PerformanceMark`](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceMark)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`PerformanceMeasure`](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceMeasure)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`PerformanceObserver`](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserver)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`PerformanceObserverEntryList`](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserverEntryList)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`PerformanceResourceTiming`](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming)
 
@@ -341,7 +340,7 @@ The table below lists all globals implemented by Node.js and Bun's current compa
 
 ### [`process`](https://nodejs.org/api/process.html)
 
-🟡 Missing `domain` `initgroups` `setegid` `seteuid` `setgid` `setgroups` `setuid` `allowedNodeEnvironmentFlags` `getActiveResourcesInfo` `setActiveResourcesInfo` `moduleLoadList` `setSourceMapsEnabled`. `process.binding` is partially implemented.
+🟡 Missing `domain` `hasUncaughtExceptionCaptureCallback` `initgroups` `report` `resourceUsage` `setUncaughtExceptionCaptureCallback` `setegid` `seteuid` `setgid` `setgroups` `setuid` `allowedNodeEnvironmentFlags` `getActiveResourcesInfo` `setActiveResourcesInfo` `moduleLoadList` `setSourceMapsEnabled` `channel`. `process.binding` is partially implemented.
 
 ### [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask)
 
@@ -357,11 +356,11 @@ The table below lists all globals implemented by Node.js and Bun's current compa
 
 ### [`ReadableStreamBYOBReader`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamBYOBReader)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`ReadableStreamBYOBRequest`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamBYOBRequest)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`ReadableStreamDefaultController`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamDefaultController)
 
@@ -413,7 +412,7 @@ The table below lists all globals implemented by Node.js and Bun's current compa
 
 ### [`TextDecoderStream`](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoderStream)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`TextEncoder`](https://developer.mozilla.org/en-US/docs/Web/API/TextEncoder)
 
@@ -421,7 +420,7 @@ The table below lists all globals implemented by Node.js and Bun's current compa
 
 ### [`TextEncoderStream`](https://developer.mozilla.org/en-US/docs/Web/API/TextEncoderStream)
 
-🟢 Fully implemented.
+🔴 Not implemented.
 
 ### [`TransformStream`](https://developer.mozilla.org/en-US/docs/Web/API/TransformStream)
 

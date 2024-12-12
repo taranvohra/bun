@@ -1,6 +1,6 @@
 Use the built-in `bun:ffi` module to efficiently call native libraries from JavaScript. It works with languages that support the C ABI (Zig, Rust, C/C++, C#, Nim, Kotlin, etc).
 
-## dlopen usage (`bun:ffi`)
+## Usage (`bun:ffi`)
 
 To print the version number of `sqlite3`:
 
@@ -58,18 +58,17 @@ Pass a path to the shared library and a map of symbols to import into `dlopen`:
 
 ```ts
 import { dlopen, FFIType, suffix } from "bun:ffi";
-const { i32 } = FFIType;
 
 const path = `libadd.${suffix}`;
 
 const lib = dlopen(path, {
   add: {
-    args: [i32, i32],
-    returns: i32,
+    args: [FFIType.i32, FFIType.i32],
+    returns: FFIType.i32,
   },
 });
 
-console.log(lib.symbols.add(1, 2));
+lib.symbols.add(1, 2);
 ```
 
 ### Rust
@@ -77,7 +76,7 @@ console.log(lib.symbols.add(1, 2));
 ```rust
 // add.rs
 #[no_mangle]
-pub extern "C" fn add(a: i32, b: i32) -> i32 {
+pub extern "C" fn add(a: isize, b: isize) -> isize {
     a + b
 }
 ```
@@ -88,50 +87,29 @@ To compile:
 $ rustc --crate-type cdylib add.rs
 ```
 
-### C++
-
-```c
-#include <cstdint>
-
-extern "C" int32_t add(int32_t a, int32_t b) {
-    return a + b;
-}
-```
-
-To compile:
-
-```bash
-$ zig build-lib add.cpp -dynamic -lc -lc++
-```
-
 ## FFI types
 
 The following `FFIType` values are supported.
 
-| `FFIType`  | C Type         | Aliases                     |
-| ---------- | -------------- | --------------------------- |
-| buffer     | `char*`        |                             |
-| cstring    | `char*`        |                             |
-| function   | `(void*)(*)()` | `fn`, `callback`            |
-| ptr        | `void*`        | `pointer`, `void*`, `char*` |
-| i8         | `int8_t`       | `int8_t`                    |
-| i16        | `int16_t`      | `int16_t`                   |
-| i32        | `int32_t`      | `int32_t`, `int`            |
-| i64        | `int64_t`      | `int64_t`                   |
-| i64_fast   | `int64_t`      |                             |
-| u8         | `uint8_t`      | `uint8_t`                   |
-| u16        | `uint16_t`     | `uint16_t`                  |
-| u32        | `uint32_t`     | `uint32_t`                  |
-| u64        | `uint64_t`     | `uint64_t`                  |
-| u64_fast   | `uint64_t`     |                             |
-| f32        | `float`        | `float`                     |
-| f64        | `double`       | `double`                    |
-| bool       | `bool`         |                             |
-| char       | `char`         |                             |
-| napi_env   | `napi_env`     |                             |
-| napi_value | `napi_value`   |                             |
-
-Note: `buffer` arguments must be a `TypedArray` or `DataView`.
+| `FFIType` | C Type         | Aliases                     |
+| --------- | -------------- | --------------------------- |
+| cstring   | `char*`        |                             |
+| function  | `(void*)(*)()` | `fn`, `callback`            |
+| ptr       | `void*`        | `pointer`, `void*`, `char*` |
+| i8        | `int8_t`       | `int8_t`                    |
+| i16       | `int16_t`      | `int16_t`                   |
+| i32       | `int32_t`      | `int32_t`, `int`            |
+| i64       | `int64_t`      | `int64_t`                   |
+| i64_fast  | `int64_t`      |                             |
+| u8        | `uint8_t`      | `uint8_t`                   |
+| u16       | `uint16_t`     | `uint16_t`                  |
+| u32       | `uint32_t`     | `uint32_t`                  |
+| u64       | `uint64_t`     | `uint64_t`                  |
+| u64_fast  | `uint64_t`     |                             |
+| f32       | `float`        | `float`                     |
+| f64       | `double`       | `double`                    |
+| bool      | `bool`         |                             |
+| char      | `char`         |                             |
 
 ## Strings
 

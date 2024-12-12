@@ -21,8 +21,7 @@ $ bun init
 Then install the Prisma CLI (`prisma`) and Prisma Client (`@prisma/client`) as dependencies.
 
 ```bash
-$ bun add -d prisma
-$ bun add @prisma/client
+$ bun add prisma @prisma/client
 ```
 
 ---

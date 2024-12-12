@@ -17,13 +17,13 @@ Bun supports things like top-level await, JSX, and extensioned `.ts` imports, wh
 ```jsonc
 {
   "compilerOptions": {
-    // Enable latest features
+    // enable latest features
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
+    "jsx": "react-jsx", // support JSX
+    "allowJs": true, // allow importing `.js` from `.ts`
 
     // Bundler mode
     "moduleResolution": "bundler",
@@ -34,17 +34,18 @@ Bun supports things like top-level await, JSX, and extensioned `.ts` imports, wh
     // Best practices
     "strict": true,
     "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
     // Some stricter flags
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "useUnknownInCatchVariables": true,
     "noPropertyAccessFromIndexSignature": true
   }
 }
 ```
 
-If you run `bun init` in a new directory, this `tsconfig.json` will be generated for you. (The stricter flags are disabled by default.)
+If you run `bun init` in a new directory, this `tsconfig.json` will be generated for you.
 
 ```sh
 $ bun init

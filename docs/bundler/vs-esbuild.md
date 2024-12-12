@@ -2,12 +2,12 @@ Bun's bundler API is inspired heavily by [esbuild](https://esbuild.github.io/). 
 
 There are a few behavioral differences to note.
 
-- **Bundling by default**. Unlike esbuild, Bun _always bundles by default_. This is why the `--bundle` flag isn't necessary in the Bun example. To transpile each file individually, use [`Bun.Transpiler`](https://bun.sh/docs/api/transpiler).
+- **Bundling by default**. Unlike esbuild, Bun _always bundles by default_. This is why the `--bundle` flag isn't necessary in the Bun example. To transpile each file individually, use [`Bun.Transpiler`](/docs/api/transpiler).
 - **It's just a bundler**. Unlike esbuild, Bun's bundler does not include a built-in development server or file watcher. It's just a bundler. The bundler is intended for use in conjunction with `Bun.serve` and other runtime APIs to achieve the same effect. As such, all options relating to HTTP/file watching are not applicable.
 
 ## Performance
 
-With a performance-minded API coupled with the extensively optimized Zig-based JS/TS parser, Bun's bundler is 1.75x faster than esbuild on esbuild's [three.js benchmark](https://github.com/oven-sh/bun/tree/main/bench/bundle).
+With an performance-minded API coupled with the extensively optimized Zig-based JS/TS parser, Bun's bundler is 1.75x faster than esbuild on esbuild's [three.js benchmark](https://github.com/oven-sh/bun/tree/main/bench/bundle).
 
 {% image src="/images/bundler-speed.png" caption="Bundling 10 copies of three.js from scratch, with sourcemaps and minification" /%}
 
@@ -59,13 +59,13 @@ In Bun's CLI, simple boolean flags like `--minify` do not accept an argument. Ot
 
 - `--format`
 - `--format`
-- Bun supports `"esm"` and `"cjs"` currently, but more module formats are planned. esbuild defaults to `"iife"`.
+- Bun only supports `"esm"` currently but other module formats are planned. esbuild defaults to `"iife"`.
 
 ---
 
 - `--loader:.ext=loader`
 - `--loader .ext:loader`
-- Bun supports a different set of built-in loaders than esbuild; see [Bundler > Loaders](https://bun.sh/docs/bundler/loaders) for a complete reference. The esbuild loaders `dataurl`, `binary`, `base64`, `copy`, and `empty` are not yet implemented.
+- Bun supports a different set of built-in loaders than esbuild; see [Bundler > Loaders](/docs/bundler/loaders) for a complete reference. The esbuild loaders `dataurl`, `binary`, `base64`, `copy`, and `empty` are not yet implemented.
 
   The syntax for `--loader` is slightly different.
 
@@ -94,8 +94,8 @@ In Bun's CLI, simple boolean flags like `--minify` do not accept an argument. Ot
 ---
 
 - `--packages`
-- `--packages`
-- No differences
+- n/a
+- Not supported
 
 ---
 
@@ -154,14 +154,8 @@ In Bun's CLI, simple boolean flags like `--minify` do not accept an argument. Ot
 ---
 
 - `--banner`
-- `--banner`
-- Only applies to js bundles
-
----
-
-- `--footer`
-- `--footer`
-- Only applies to js bundles
+- n/a
+- Not supported
 
 ---
 
@@ -190,13 +184,20 @@ In Bun's CLI, simple boolean flags like `--minify` do not accept an argument. Ot
 ---
 
 - `--drop`
-- `--drop`
+- n/a
+- Not supported
 
 ---
 
 - `--entry-names`
 - `--entry-naming`
 - Renamed for consistency with `naming` in JS API
+
+---
+
+- `--footer`
+- n/a
+- Not supported
 
 ---
 
@@ -207,7 +208,8 @@ In Bun's CLI, simple boolean flags like `--minify` do not accept an argument. Ot
 ---
 
 - `--ignore-annotations`
-- `--ignore-dce-annotations`
+- n/a
+- Not supported
 
 ---
 
@@ -474,7 +476,7 @@ In Bun's CLI, simple boolean flags like `--minify` do not accept an argument. Ot
 
 - `bundle`
 - n/a
-- Always `true`. Use [`Bun.Transpiler`](https://bun.sh/docs/api/transpiler) to transpile without bundling.
+- Always `true`. Use [`Bun.Transpiler`](/docs/api/transpiler) to transpile without bundling.
 
 ---
 
@@ -635,7 +637,7 @@ In Bun's CLI, simple boolean flags like `--minify` do not accept an argument. Ot
 
 - `loader`
 - `loader`
-- Bun supports a different set of built-in loaders than esbuild; see [Bundler > Loaders](https://bun.sh/docs/bundler/loaders) for a complete reference. The esbuild loaders `dataurl`, `binary`, `base64`, `copy`, and `empty` are not yet implemented.
+- Bun supports a different set of built-in loaders than esbuild; see [Bundler > Loaders](/docs/bundler/loaders) for a complete reference. The esbuild loaders `dataurl`, `binary`, `base64`, `copy`, and `empty` are not yet implemented.
 
 ---
 
@@ -891,7 +893,7 @@ const myPlugin: BunPlugin = {
 };
 ```
 
-The `builder` object provides some methods for hooking into parts of the bundling process. Bun implements `onResolve` and `onLoad`; it does not yet implement the esbuild hooks `onStart`, `onEnd`, and `onDispose`, and `resolve` utilities. `initialOptions` is partially implemented, being read-only and only having a subset of esbuild's options; use [`config`](https://bun.sh/docs/bundler/plugins) (same thing but with Bun's `BuildConfig` format) instead.
+The `builder` object provides some methods for hooking into parts of the bundling process. Bun implements `onResolve` and `onLoad`; it does not yet implement the esbuild hooks `onStart`, `onEnd`, and `onDispose`, and `resolve` utilities. `initialOptions` is partially implemented, being read-only and only having a subset of esbuild's options; use [`config`](/docs/bundler/plugins) (same thing but with Bun's `BuildConfig` format) instead.
 
 ```ts
 import type { BunPlugin } from "bun";

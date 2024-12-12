@@ -29,7 +29,7 @@ Since our entry point is a `*.ts` file, Bun generates a `tsconfig.json` for you.
 
 ## Run a file
 
-Open `index.ts` and paste the following code snippet, which implements a simple HTTP server with [`Bun.serve`](https://bun.sh/docs/api/http).
+Open `index.ts` and paste the following code snippet, which implements a simple HTTP server with [`Bun.serve`](/docs/api/http).
 
 ```ts
 const server = Bun.serve({
@@ -45,25 +45,18 @@ console.log(`Listening on http://localhost:${server.port} ...`);
 {% details summary="Seeing TypeScript errors on `Bun`?" %}
 If you used `bun init`, Bun will have automatically installed Bun's TypeScript declarations and configured your `tsconfig.json`. If you're trying out Bun in an existing project, you may see a type error on the `Bun` global.
 
-To fix this, first install `@types/bun` as a dev dependency.
+To fix this, first install `bun-types` as a dev dependency.
 
 ```sh
-$ bun add -d @types/bun
+$ bun add -d bun-types
 ```
 
-Then add the following to your `compilerOptions` in `tsconfig.json`:
+Then add the following line to your `compilerOptions` in `tsconfig.json`.
 
-```json#tsconfig.json
+```json-diff#tsconfig.json
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
++   "types": ["bun-types"]
   }
 }
 ```
@@ -92,7 +85,7 @@ Bun can also execute `"scripts"` from your `package.json`. Add the following scr
 +     "start": "bun run index.ts"
 +   },
     "devDependencies": {
-      "@types/bun": "^1.0.0"
+      "bun-types": "^0.7.0"
     }
   }
 ```
@@ -124,12 +117,12 @@ Update `index.ts` to use `figlet` in the `fetch` handler.
 + import figlet from "figlet";
 
   const server = Bun.serve({
-    port: 3000,
-    fetch(req) {
+    fetch() {
 +     const body = figlet.textSync("Bun!");
 +     return new Response(body);
 -     return new Response("Bun!");
     },
+    port: 3000,
   });
 ```
 

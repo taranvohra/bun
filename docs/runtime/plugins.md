@@ -1,4 +1,4 @@
-Bun provides a universal plugin API that can be used to extend both the _runtime_ and [_bundler_](https://bun.sh/docs/bundler).
+Bun provides a universal plugin API that can be used to extend both the _runtime_ and [_bundler_](/docs/bundler).
 
 Plugins intercept imports and perform custom loading logic: reading files, transpiling code, etc. They can be used to add support for additional file types, like `.scss` or `.yaml`. In the context of Bun's bundler, plugins can be used to implement framework-level features like CSS extraction, macros, and client-server code co-location.
 
@@ -19,7 +19,7 @@ const myPlugin: BunPlugin = {
 plugin(myPlugin);
 ```
 
-Plugins have to be loaded before any other code runs! To achieve this, use the `preload` option in your [`bunfig.toml`](https://bun.sh/docs/runtime/bunfig). Bun automatically loads the files/modules specified in `preload` before running a file.
+Plugins have to be loaded before any other code runs! To achieve this, use the `preload` option in your [`bunfig.toml`](/docs/runtime/bunfig). Bun automatically loads the files/modules specified in `preload` before running a file.
 
 ```toml
 preload = ["./myPlugin.ts"]
@@ -47,7 +47,7 @@ plugin(
 );
 ```
 
-Bun's plugin API is loosely based on [esbuild](https://esbuild.github.io/plugins). Only [a subset](https://bun.sh/docs/bundler/vs-esbuild#plugin-api) of the esbuild API is implemented, but some esbuild plugins "just work" in Bun, like the official [MDX loader](https://mdxjs.com/packages/esbuild/):
+Bun's plugin API is loosely based on [esbuild](https://esbuild.github.io/plugins). Only [a subset](/docs/bundler/vs-esbuild#plugin-api) of the esbuild API is implemented, but some esbuild plugins "just work" in Bun, like the official [MDX loader](https://mdxjs.com/packages/esbuild/):
 
 ```jsx
 import { plugin } from "bun";
@@ -63,16 +63,17 @@ Plugins are primarily used to extend Bun with loaders for additional file types.
 ```ts#yamlPlugin.ts
 import { plugin } from "bun";
 
-await plugin({
+plugin({
   name: "YAML",
   async setup(build) {
     const { load } = await import("js-yaml");
+    const { readFileSync } = await import("fs");
 
     // when a .yaml file is imported...
-    build.onLoad({ filter: /\.(yaml|yml)$/ }, async (args) => {
+    build.onLoad({ filter: /\.(yaml|yml)$/ }, (args) => {
 
       // read and parse the file
-      const text = await Bun.file(args.path).text();
+      const text = readFileSync(args.path, "utf8");
       const exports = load(text) as Record<string, any>;
 
       // and returns it as a module
@@ -110,7 +111,7 @@ releaseYear: 2023
 
 Note that the returned object has a `loader` property. This tells Bun which of its internal loaders should be used to handle the result. Even though we're implementing a loader for `.yaml`, the result must still be understandable by one of Bun's built-in loaders. It's loaders all the way down.
 
-In this case we're using `"object"`—a built-in loader (intended for use by plugins) that converts a plain JavaScript object to an equivalent ES module. Any of Bun's built-in loaders are supported; these same loaders are used by Bun internally for handling files of various kinds. The table below is a quick reference; refer to [Bundler > Loaders](https://bun.sh/docs/bundler/loaders) for complete documentation.
+In this case we're using `"object"`—a built-in loader (intended for use by plugins) that converts a plain JavaScript object to an equivalent ES module. Any of Bun's built-in loaders are supported; these same loaders are used by Bun internally for handling files of various kinds. The table below is a quick reference; refer to [Bundler > Loaders](/docs/bundler/loaders) for complete documentation.
 
 {% table %}
 
@@ -179,16 +180,17 @@ Loading a YAML file is useful, but plugins support more than just data loading. 
 ```ts#sveltePlugin.ts
 import { plugin } from "bun";
 
-await plugin({
+plugin({
   name: "svelte loader",
   async setup(build) {
     const { compile } = await import("svelte/compiler");
+    const { readFileSync } = await import("fs");
 
     // when a .svelte file is imported...
-    build.onLoad({ filter: /\.svelte$/ }, async ({ path }) => {
+    build.onLoad({ filter: /\.svelte$/ }, ({ path }) => {
 
       // read and compile it with the Svelte compiler
-      const file = await Bun.file(path).text();
+      const file = readFileSync(path, "utf8");
       const contents = compile(file, {
         filename: path,
         generate: "ssr",
@@ -214,7 +216,7 @@ With this plugin, Svelte components can now be directly imported and consumed.
 import "./sveltePlugin.ts";
 import MySvelteComponent from "./component.svelte";
 
-console.log(MySvelteComponent.render());
+console.log(mySvelteComponent.render());
 ```
 
 ## Virtual Modules
@@ -237,7 +239,7 @@ plugin({
 
   setup(build) {
     build.module(
-      // The specifier, which can be any string - except a built-in, such as "buffer"
+      // The specifier, which can be any string
       "my-transpiled-virtual-module",
       // The callback to run when the module is imported or required for the first time
       () => {
@@ -302,9 +304,9 @@ require("my-object-virtual-module"); // { baz: "quix" }
 await import("my-object-virtual-module"); // { baz: "quix" }
 ```
 
-## Reading or modifying the config
+## Reading the config
 
-Plugins can read and write to the [build config](https://bun.sh/docs/bundler#api) with `build.config`.
+Plugins can read and write to the [build config](/docs/bundler#api) with `build.config`.
 
 ```ts
 Bun.build({
@@ -327,45 +329,7 @@ Bun.build({
 });
 ```
 
-{% callout %}
-
-**NOTE**: Plugin lifcycle callbacks (`onStart()`, `onResolve()`, etc.) do not have the ability to modify the `build.config` object in the `setup()` function. If you want to mutate `build.config`, you must do so directly in the `setup()` function:
-
-```ts
-Bun.build({
-  entrypoints: ["./app.ts"],
-  outdir: "./dist",
-  sourcemap: "external",
-  plugins: [
-    {
-      name: "demo",
-      setup(build) {
-        // ✅ good! modifying it directly in the setup() function
-        build.config.minify = true;
-
-        build.onStart(() => {
-          // 🚫 uh-oh! this won't work!
-          build.config.minify = false;
-        });
-      },
-    },
-  ],
-});
-```
-
-{% /callout %}
-
-## Lifecycle hooks
-
-Plugins can register callbacks to be run at various points in the lifecycle of a bundle:
-
-- [`onStart()`](#onstart): Run once the bundler has started a bundle
-- [`onResolve()`](#onresolve): Run before a module is resolved
-- [`onLoad()`](#onload): Run before a module is loaded.
-
-### Reference
-
-A rough overview of the types (please refer to Bun's `bun.d.ts` for the full type definitions):
+## Reference
 
 ```ts
 namespace Bun {
@@ -376,7 +340,6 @@ namespace Bun {
 }
 
 type PluginBuilder = {
-  onStart(callback: () => void): void;
   onResolve: (
     args: { filter: RegExp; namespace?: string },
     callback: (args: { path: string; importer: string }) => {
@@ -395,308 +358,7 @@ type PluginBuilder = {
   config: BuildConfig;
 };
 
-type Loader = "js" | "jsx" | "ts" | "tsx" | "css" | "json" | "toml" | "object";
+type Loader = "js" | "jsx" | "ts" | "tsx" | "json" | "toml" | "object";
 ```
 
-### Namespaces
-
-`onLoad` and `onResolve` accept an optional `namespace` string. What is a namespaace?
-
-Every module has a namespace. Namespaces are used to prefix the import in transpiled code; for instance, a loader with a `filter: /\.yaml$/` and `namespace: "yaml:"` will transform an import from `./myfile.yaml` into `yaml:./myfile.yaml`.
-
-The default namespace is `"file"` and it is not necessary to specify it, for instance: `import myModule from "./my-module.ts"` is the same as `import myModule from "file:./my-module.ts"`.
-
-Other common namespaces are:
-
-- `"bun"`: for Bun-specific modules (e.g. `"bun:test"`, `"bun:sqlite"`)
-- `"node"`: for Node.js modules (e.g. `"node:fs"`, `"node:path"`)
-
-### `onStart`
-
-```ts
-onStart(callback: () => void): Promise<void> | void;
-```
-
-Registers a callback to be run when the bundler starts a new bundle.
-
-```ts
-import { plugin } from "bun";
-
-plugin({
-  name: "onStart example",
-
-  setup(build) {
-    build.onStart(() => {
-      console.log("Bundle started!");
-    });
-  },
-});
-```
-
-The callback can return a `Promise`. After the bundle process has initialized, the bundler waits until all `onStart()` callbacks have completed before continuing.
-
-For example:
-
-```ts
-const result = await Bun.build({
-  entrypoints: ["./app.ts"],
-  outdir: "./dist",
-  sourcemap: "external",
-  plugins: [
-    {
-      name: "Sleep for 10 seconds",
-      setup(build) {
-        build.onStart(async () => {
-          await Bunlog.sleep(10_000);
-        });
-      },
-    },
-    {
-      name: "Log bundle time to a file",
-      setup(build) {
-        build.onStart(async () => {
-          const now = Date.now();
-          await Bun.$`echo ${now} > bundle-time.txt`;
-        });
-      },
-    },
-  ],
-});
-```
-
-In the above example, Bun will wait until the first `onStart()` (sleeping for 10 seconds) has completed, _as well as_ the second `onStart()` (writing the bundle time to a file).
-
-Note that `onStart()` callbacks (like every other lifecycle callback) do not have the ability to modify the `build.config` object. If you want to mutate `build.config`, you must do so directly in the `setup()` function.
-
-### `onResolve`
-
-```ts
-onResolve(
-  args: { filter: RegExp; namespace?: string },
-  callback: (args: { path: string; importer: string }) => {
-    path: string;
-    namespace?: string;
-  } | void,
-): void;
-```
-
-To bundle your project, Bun walks down the dependency tree of all modules in your project. For each imported module, Bun actually has to find and read that module. The "finding" part is known as "resolving" a module.
-
-The `onResolve()` plugin lifecycle callback allows you to configure how a module is resolved.
-
-The first argument to `onResolve()` is an object with a `filter` and [`namespace`](#what-is-a-namespace) property. The filter is a regular expression which is run on the import string. Effectively, these allow you to filter which modules your custom resolution logic will apply to.
-
-The second argument to `onResolve()` is a callback which is run for each module import Bun finds that matches the `filter` and `namespace` defined in the first argument.
-
-The callback receives as input the _path_ to the matching module. The callback can return a _new path_ for the module. Bun will read the contents of the _new path_ and parse it as a module.
-
-For example, redirecting all imports to `images/` to `./public/images/`:
-
-```ts
-import { plugin } from "bun";
-
-plugin({
-  name: "onResolve example",
-  setup(build) {
-    build.onResolve({ filter: /.*/, namespace: "file" }, args => {
-      if (args.path.startsWith("images/")) {
-        return {
-          path: args.path.replace("images/", "./public/images/"),
-        };
-      }
-    });
-  },
-});
-```
-
-### `onLoad`
-
-```ts
-onLoad(
-  args: { filter: RegExp; namespace?: string },
-  callback: (args: { path: string, importer: string, namespace: string, kind: ImportKind  }) => {
-    loader?: Loader;
-    contents?: string;
-    exports?: Record<string, any>;
-  },
-): void;
-```
-
-After Bun's bundler has resolved a module, it needs to read the contents of the module and parse it.
-
-The `onLoad()` plugin lifecycle callback allows you to modify the _contents_ of a module before it is read and parsed by Bun.
-
-Like `onResolve()`, the first argument to `onLoad()` allows you to filter which modules this invocation of `onLoad()` will apply to.
-
-The second argument to `onLoad()` is a callback which is run for each matching module _before_ Bun loads the contents of the module into memory.
-
-This callback receives as input the _path_ to the matching module, the _importer_ of the module (the module that imported the module), the _namespace_ of the module, and the _kind_ of the module.
-
-The callback can return a new `contents` string for the module as well as a new `loader`.
-
-For example:
-
-```ts
-import { plugin } from "bun";
-
-plugin({
-  name: "env plugin",
-  setup(build) {
-    build.onLoad({ filter: /env/, namespace: "file" }, args => {
-      return {
-        contents: `export default ${JSON.stringify(process.env)}`,
-        loader: "js",
-      };
-    });
-  },
-});
-```
-
-This plugin will transform all imports of the form `import env from "env"` into a JavaScript module that exports the current environment variables.
-
-#### `.defer()`
-
-One of the arguments passed to the `onLoad` callback is a `defer` function. This function returns a `Promise` that is resolved when all _other_ modules have been loaded.
-
-This allows you to delay execution of the `onLoad` callback until all other modules have been loaded.
-
-This is useful for returning contens of a module that depends on other modules.
-
-##### Example: tracking and reporting unused exports
-
-```ts
-import { plugin } from "bun";
-
-plugin({
-  name: "track imports",
-  setup(build) {
-    const transpiler = new Bun.Transpiler();
-
-    let trackedImports: Record<string, number> = {};
-
-    // Each module that goes through this onLoad callback
-    // will record its imports in `trackedImports`
-    build.onLoad({ filter: /\.ts/ }, async ({ path }) => {
-      const contents = await Bun.file(path).arrayBuffer();
-
-      const imports = transpiler.scanImports(contents);
-
-      for (const i of imports) {
-        trackedImports[i.path] = (trackedImports[i.path] || 0) + 1;
-      }
-
-      return undefined;
-    });
-
-    build.onLoad({ filter: /stats\.json/ }, async ({ defer }) => {
-      // Wait for all files to be loaded, ensuring
-      // that every file goes through the above `onLoad()` function
-      // and their imports tracked
-      await defer();
-
-      // Emit JSON containing the stats of each import
-      return {
-        contents: `export default ${JSON.stringify(trackedImports)}`,
-        loader: "json",
-      };
-    });
-  },
-});
-```
-
-Note that the `.defer()` function currently has the limitation that it can only be called once per `onLoad` callback.
-
-## Native plugins
-
-{% callout %}
-**NOTE** — This is an advanced and experiemental API recommended for plugin developers who are familiar with systems programming and the C ABI. Use with caution.
-{% /callout %}
-
-One of the reasons why Bun's bundler is so fast is that it is written in native code and leverages multi-threading to load and parse modules in parallel.
-
-However, one limitation of plugins written in JavaScript is that JavaScript itself is single-threaded.
-
-Native plugins are written as [NAPI](/docs/node-api) modules and can be run on multiple threads. This allows native plugins to run much faster than JavaScript plugins.
-
-In addition, native plugins can skip unnecessary work such as the UTF-8 -> UTF-16 conversion needed to pass strings to JavaScript.
-
-These are the following lifecycle hooks which are available to native plugins:
-
-- [`onBeforeParse()`](#onbeforeparse): Called on any thread before a file is parsed by Bun's bundler.
-
-### Creating a native plugin
-
-Native plugins are NAPI modules which expose lifecycle hooks as C ABI functions.
-
-To create a native plugin, you must export a C ABI function which matches the signature of the native lifecycle hook you want to implement.
-
-#### Example: Rust with napi-rs
-
-First initialize a napi project (see [here](https://napi.rs/docs/introduction/getting-started) for a more comprehensive guide).
-
-Then install Bun's official safe plugin wrapper crate:
-
-```bash
-cargo add bun-native-plugin
-```
-
-Now you can export an `extern "C" fn` which is the implementation of your plugin:
-
-```rust
-#[no_mangle]
-extern "C" fn on_before_parse_impl(
-  args: *const bun_native_plugin::sys::OnBeforeParseArguments,
-  result: *mut bun_native_plugin::sys::OnBeforeParseResult,
-) {
-  let args = unsafe { &*args };
-  let result = unsafe { &mut *result };
-
-  let mut handle = match bun_native_plugin::OnBeforeParse::from_raw(args, result) {
-    Ok(handle) => handle,
-    Err(_) => {
-      return;
-    }
-  };
-
-  let source_code = match handle.input_source_code() {
-    Ok(source_code) => source_code,
-    Err(_) => {
-      handle.log_error("Fetching source code failed!");
-      return;
-    }
-  };
-
-  let loader = handle.output_loader();
-  handle.set_output_source_code(source_code.replace("foo", "bar"), loader);
-```
-
-Use napi-rs to compile the plugin to a `.node` file, then you can `require()` it from JS and use it:
-
-```js
-await Bun.build({
-  entrypoints: ["index.ts"],
-  setup(build) {
-    const myNativePlugin = require("./path/to/plugin.node");
-
-    build.onBeforeParse(
-      { filter: /\.ts/ },
-      { napiModule: myNativePlugin, symbol: "on_before_parse_impl" },
-    );
-  },
-});
-```
-
-### `onBeforeParse`
-
-```ts
-onBeforeParse(
-  args: { filter: RegExp; namespace?: string },
-  callback: { napiModule: NapiModule; symbol: string; external?: unknown },
-): void;
-```
-
-This lifecycle callback is run immediately before a file is parsed by Bun's bundler.
-
-As input, it receives the file's contents and can optionally return new source code.
-
-This callback can be called from any thread and so the napi module implementation must be thread-safe.
+The `onLoad` method optionally accepts a `namespace` in addition to the `filter` regex. This namespace will be be used to prefix the import in transpiled code; for instance, a loader with a `filter: /\.yaml$/` and `namespace: "yaml:"` will transform an import from `./myfile.yaml` into `yaml:./myfile.yaml`.

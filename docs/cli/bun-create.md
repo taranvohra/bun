@@ -4,7 +4,7 @@
 
 Template a new Bun project with `bun create`. This is a flexible command that can be used to create a new project with a `create-<template>` npm package, a GitHub repo, or a local template.
 
-If you're looking to create a brand new empty project, use [`bun init`](https://bun.sh/docs/cli/init).
+If you're looking to create a brand new empty project, use [`bun init`](/docs/cli/init).
 
 ## From `npm`
 
@@ -207,8 +207,8 @@ After cloning a template, `bun create` will automatically remove the `"bun-creat
 
 ---
 
-- `GITHUB_TOKEN` (or `GITHUB_ACCESS_TOKEN`)
-- This lets `bun create` work with private repositories or if you get rate-limited. `GITHUB_TOKEN` is chosen over `GITHUB_ACCESS_TOKEN` if both exist.
+- `GITHUB_ACCESS_TOKEN`
+- This lets `bun create` work with private repositories or if you get rate-limited
 
 {% /table %}
 

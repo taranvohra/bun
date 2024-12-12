@@ -15,13 +15,13 @@ Below is the full set of recommended `compilerOptions` for a Bun project. With t
 ```jsonc
 {
   "compilerOptions": {
-    // Enable latest features
-    "lib": ["ESNext", "DOM"],
+    // enable latest features
+    "lib": ["ESNext"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
+    "jsx": "react-jsx", // support JSX
+    "allowJs": true, // allow importing `.js` from `.ts`
 
     // Bundler mode
     "moduleResolution": "bundler",
@@ -32,16 +32,17 @@ Below is the full set of recommended `compilerOptions` for a Bun project. With t
     // Best practices
     "strict": true,
     "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
     // Some stricter flags
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noPropertyAccessFromIndexSignature": true,
-  },
+    "useUnknownInCatchVariables": true,
+    "noPropertyAccessFromIndexSignature": true
+  }
 }
 ```
 
 ---
 
-Refer to [Ecosystem > TypeScript](https://bun.sh/docs/runtime/typescript) for a complete guide to TypeScript support in Bun.
+Refer to [Ecosystem > TypeScript](/docs/runtime/typescript) for a complete guide to TypeScript support in Bun.

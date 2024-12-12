@@ -1,34 +1,17 @@
-To update all dependencies to the latest version:
+To update all dependencies to the latest version _that's compatible with the version range specified in your `package.json`_:
 
 ```sh
 $ bun update
 ```
 
-To update a specific dependency to the latest version:
+## `--force`
+
+{% callout %}
+**Alias** — `-f`
+{% /callout %}
+
+By default, Bun respects the version range defined in your package.json. To ignore this and update to the latest version, you can pass in the `force` flag.
 
 ```sh
-$ bun update [package]
+$ bun update --force
 ```
-
-## `--latest`
-
-By default, `bun update` will update to the latest version of a dependency that satisfies the version range specified in your `package.json`.
-
-To update to the latest version, regardless of if it's compatible with the current version range, use the `--latest` flag:
-
-```sh
-$ bun update --latest
-```
-
-For example, with the following `package.json`:
-
-```json
-{
-  "dependencies": {
-    "react": "^17.0.2"
-  }
-}
-```
-
-- `bun update` would update to a version that matches `17.x`.
-- `bun update --latest` would update to a version that matches `18.x` or later.

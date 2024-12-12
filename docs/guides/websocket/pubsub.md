@@ -20,11 +20,11 @@ const server = Bun.serve<{ username: string }>({
     open(ws) {
       const msg = `${ws.data.username} has entered the chat`;
       ws.subscribe("the-group-chat");
-      server.publish("the-group-chat", msg);
+      ws.publish("the-group-chat", msg);
     },
     message(ws, message) {
       // the server re-broadcasts incoming messages to everyone
-      server.publish("the-group-chat", `${ws.data.username}: ${message}`);
+      ws.publish("the-group-chat", `${ws.data.username}: ${message}`);
     },
     close(ws) {
       const msg = `${ws.data.username} has left the chat`;

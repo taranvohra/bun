@@ -37,10 +37,7 @@ Alternatively, you can create a PM2 configuration file. Create a file named `pm2
 module.exports = {
   name: "app", // Name of your application
   script: "index.ts", // Entry point of your application
-  interpreter: "bun", // Bun interpreter
-  env: {
-    PATH: `${process.env.HOME}/.bun/bin:${process.env.PATH}`, // Add "~/.bun/bin/bun" to PATH
-  }
+  interpreter: "~/.bun/bin/bun", // Path to the Bun interpreter
 };
 ```
 

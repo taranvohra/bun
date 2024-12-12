@@ -1,8 +1,8 @@
 {% callout %}
 
-<!-- **Note** — The `Bun.file` and `Bun.write` APIs documented on this page are heavily optimized and represent the recommended way to perform file-system tasks using Bun. Existing Node.js projects may use Bun's [nearly complete](https://bun.sh/docs/runtime/nodejs-apis#node-fs) implementation of the [`node:fs`](https://nodejs.org/api/fs.html) module. -->
+<!-- **Note** — The `Bun.file` and `Bun.write` APIs documented on this page are heavily optimized and represent the recommended way to perform file-system tasks using Bun. Existing Node.js projects may use Bun's [nearly complete](/docs/runtime/nodejs-apis#node-fs) implementation of the [`node:fs`](https://nodejs.org/api/fs.html) module. -->
 
-**Note** — The `Bun.file` and `Bun.write` APIs documented on this page are heavily optimized and represent the recommended way to perform file-system tasks using Bun. For operations that are not yet available with `Bun.file`, such as `mkdir` or `readdir`, you can use Bun's [nearly complete](https://bun.sh/docs/runtime/nodejs-apis#node-fs) implementation of the [`node:fs`](https://nodejs.org/api/fs.html) module.
+**Note** — The `Bun.file` and `Bun.write` APIs documented on this page are heavily optimized and represent the recommended way to perform file-system tasks using Bun. For operations that are not yet available with `Bun.file`, such as `mkdir` or `readdir`, you can use Bun's [nearly complete](/docs/runtime/nodejs-apis#node-fs) implementation of the [`node:fs`](https://nodejs.org/api/fs.html) module.
 
 {% /callout %}
 
@@ -28,7 +28,6 @@ const foo = Bun.file("foo.txt");
 await foo.text(); // contents as a string
 await foo.stream(); // contents as ReadableStream
 await foo.arrayBuffer(); // contents as ArrayBuffer
-await foo.bytes(); // contents as Uint8Array
 ```
 
 File references can also be created using numerical [file descriptors](https://en.wikipedia.org/wiki/File_descriptor) or `file://` URLs.
@@ -44,7 +43,6 @@ A `BunFile` can point to a location on disk where a file does not exist.
 const notreal = Bun.file("notreal.txt");
 notreal.size; // 0
 notreal.type; // "text/plain;charset=utf-8"
-const exists = await notreal.exists(); // false
 ```
 
 The default MIME type is `text/plain;charset=utf-8`, but it can be overridden by passing a second argument to `Bun.file`.
@@ -251,42 +249,6 @@ writer.unref();
 writer.ref();
 ```
 
-## Directories
-
-Bun's implementation of `node:fs` is fast, and we haven't implemented a Bun-specific API for reading directories just yet. For now, you should use `node:fs` for working with directories in Bun.
-
-### Reading directories (readdir)
-
-To read a directory in Bun, use `readdir` from `node:fs`.
-
-```ts
-import { readdir } from "node:fs/promises";
-
-// read all the files in the current directory
-const files = await readdir(import.meta.dir);
-```
-
-#### Reading directories recursively
-
-To recursively read a directory in Bun, use `readdir` with `recursive: true`.
-
-```ts
-import { readdir } from "node:fs/promises";
-
-// read all the files in the current directory, recursively
-const files = await readdir("../", { recursive: true });
-```
-
-### Creating directories (mkdir)
-
-To recursively create a directory, use `mkdir` in `node:fs`:
-
-```ts
-import { mkdir } from "node:fs/promises";
-
-await mkdir("path/to/dir", { recursive: true });
-```
-
 ## Benchmarks
 
 The following is a 3-line implementation of the Linux `cat` command.
@@ -342,7 +304,6 @@ interface BunFile {
   arrayBuffer(): Promise<ArrayBuffer>;
   json(): Promise<any>;
   writer(params: { highWaterMark?: number }): FileSink;
-  exists(): Promise<boolean>;
 }
 
 export interface FileSink {
