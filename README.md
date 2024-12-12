@@ -1,5 +1,5 @@
 ---
-icon: file-binary
+icon: brackets-curly
 ---
 
 # Code of conduct
